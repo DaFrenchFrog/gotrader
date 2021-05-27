@@ -7,8 +7,26 @@ import (
 	"net/http"
 )
 
-func CoinReader() {
-	httpResp, err := http.Get("https://ftx.com/api/markets")
+type CoinReader struct {
+	url string
+}
+
+func New(url string) CoinReader {
+	return CoinReader{
+		url: url,
+	}
+}
+
+func (c CoinReader) Url() string {
+	return c.url
+}
+
+func (c *CoinReader) SetUrl(url string) {
+	c.url = url
+}
+
+func (c CoinReader) Read() {
+	httpResp, err := http.Get(c.url)
 	if err != nil {
 		log.Fatal(err)
 	}

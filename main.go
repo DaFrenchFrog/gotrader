@@ -33,9 +33,11 @@ type result struct {
 }
 
 func main() {
-	if os.Args[1] == "read" {
-		reader := coinReader.CoinReader
-		reader()
+	if len(os.Args) > 2 {
+		if os.Args[1] == "read" {
+			reader := coinReader.New("https://ftx.com/api/markets")
+			reader.Read()
+		}
 	} else {
 		httpResp, err := http.Get("https://ftx.com/api/markets")
 		if err != nil {
@@ -56,4 +58,5 @@ func main() {
 			fmt.Printf("{\tname: %v\tpriceIncrement: %v}\n", r.Name, r.PriceIncrement)
 		}
 	}
+
 }
