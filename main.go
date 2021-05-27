@@ -1,62 +1,23 @@
 package main
 
 import (
-	"encoding/json"
-	"fmt"
-	"io/ioutil"
 	"log"
-	"net/http"
 	"os"
 
 	"github.com/elRomano/gotrader/coinReader"
 )
 
-type response struct {
-	Success bool     `json:"success"`
-	Result  []result `json:"result"`
-}
-
-type result struct {
-	Name           string  `json:"name"`
-	BaseCurrency   string  `json:baseCurrency`
-	QuoteCurrency  string  `json:quoteCurrency`
-	Type           string  `json:type`
-	Underlying     string  `json:underlying`
-	Enabled        bool    `json:"enabled"`
-	Ask            float32 `json:"ask"`
-	Bid            float32 `json:"bid"`
-	Last           float32 `json:"last"`
-	PostOnly       bool    `json:"postOnly"`
-	PriceIncrement float32 `json:"priceIncrement"`
-	SizeIncrement  float32 `json:"sizeIncrement"`
-	Restricted     bool    `json:"restricted"`
-}
-
 func main() {
-	if len(os.Args) > 2 {
+	if len(os.Args) > 1 {
+		reader := coinReader.New()
 		if os.Args[1] == "read" {
-			reader := coinReader.New("https://ftx.com/api/markets")
 			reader.Read()
+		} else if os.Args[1] == "list" {
+			reader.ListMarkets("ETH/USDT")
 		}
 	} else {
-		httpResp, err := http.Get("https://ftx.com/api/markets")
-		if err != nil {
-			log.Fatal(err)
-		}
+		log.Fatal("Missing a pair argument ! ")
 
-		defer httpResp.Body.Close()
-		bodyBytes, _ := ioutil.ReadAll(httpResp.Body)
-
-		var resp = response{}
-		err = json.Unmarshal(bodyBytes, &resp)
-		if err != nil {
-			log.Fatal(err)
-		}
-		fmt.Printf("resp success: %v \n", resp.Success)
-
-		for _, r := range resp.Result {
-			fmt.Printf("{\tname: %v\tpriceIncrement: %v}\n", r.Name, r.PriceIncrement)
-		}
 	}
 
 }
