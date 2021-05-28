@@ -2,6 +2,7 @@ package coinReader
 
 import (
 	"fmt"
+	"reflect"
 	"strings"
 
 	"github.com/elRomano/gotrader/apiCaller"
@@ -39,7 +40,7 @@ func New() CoinReader {
 	return CoinReader{}
 }
 func (c CoinReader) ListCoin(coin string) {
-	apiCaller.Call(baseURL+"/"+coin, coinDataType)
+	apiCaller.Call(baseURL+"/"+coin, reflect.TypeOf((*coinDataType)(nil)))
 }
 
 // ListMarkets is...
