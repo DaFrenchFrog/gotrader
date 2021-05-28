@@ -52,7 +52,7 @@ func (c CoinReader) ListCoin(coin string) {
 	resp := &coinDataResponse{}
 	apiCaller.Call(baseURL+"/"+coin, resp)
 	fmt.Printf("Succes:%v", resp.Success)
-	fmt.Printf("{\tname: %v\tpriceIncrement: %v}\n", resp.result.Name, resp.result.PriceIncrement)
+	fmt.Printf("{\tname: %v\tbaseCurrency: %v}\n", resp.result.Name, resp.result.BaseCurrency)
 }
 
 // ListMarkets is...
@@ -63,7 +63,7 @@ func (c CoinReader) ListMarkets(coin string) {
 
 	for _, r := range resp.Result {
 		if strings.Contains(r.Name, coin) {
-			fmt.Printf("{\tname: %v\tpriceIncrement: %v}\n", r.Name, r.PriceIncrement)
+			fmt.Printf("{\tname: %v\tpriceIncrement: %v}\n", r.Name, r.BaseCurrency)
 		}
 	}
 }
