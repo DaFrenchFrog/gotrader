@@ -30,7 +30,7 @@ func (c CoinReader) ListCoin(coin string) error {
 		return nil
 	}
 
-	fmt.Printf("name: %v\tpriceIncrement: %v\n", resp.Result.Name, resp.Result.PriceIncrement)
+	fmt.Printf("name: %v\tbaseCurrency: %v\n", resp.Result.Name, resp.Result.BaseCurrency)
 
 	return nil
 }
@@ -50,7 +50,7 @@ func (c CoinReader) ListMarkets() error {
 	}
 
 	for _, r := range resp.Result {
-		fmt.Printf("{\tname: %v\tpriceIncrement: %v}\n", r.Name, r.PriceIncrement)
+		fmt.Printf("{\tname: %v\tbaseCurrency: %v}\n", r.Name, r.BaseCurrency)
 	}
 	return nil
 }
