@@ -11,7 +11,7 @@ func main() {
 	if len(os.Args) > 1 {
 		reader := coinReader.New()
 		if os.Args[1] == "list" {
-			reader.ListMarkets()
+			reader.ListMarkets("ETH/USDT")
 		} else {
 			reader.ListCoin("ETH/USDT")
 		}

@@ -2,23 +2,31 @@ package coinReader
 
 import (
 	"fmt"
-	"reflect"
 	"strings"
 
 	"github.com/elRomano/gotrader/apiCaller"
 )
 
-type coinlListType struct {
-	Success bool     `json:"success"`
-	Result  []result `json:"result"`
+type response struct {
+	Success bool `json:"success"`
 }
 
-type coinDataType struct {
+type coinListResponse struct {
+	response
+	Result []coinData `json:"result"`
+}
+
+type coinDataResponse struct {
+	response //object composition
+	result   coinData
+}
+
+type coinData struct {
 	Name           string  `json:"name"`
-	BaseCurrency   string  `json:baseCurrency`
-	QuoteCurrency  string  `json:quoteCurrency`
-	Type           string  `json:type`
-	Underlying     string  `json:underlying`
+	BaseCurrency   string  `json:"baseCurrency"`
+	QuoteCurrency  string  `json:"quoteCurrency"`
+	Type           string  `json:"type"`
+	Underlying     string  `json:"underlying"`
 	Enabled        bool    `json:"enabled"`
 	Ask            float32 `json:"ask"`
 	Bid            float32 `json:"bid"`
@@ -39,14 +47,19 @@ type CoinReader struct {
 func New() CoinReader {
 	return CoinReader{}
 }
+
 func (c CoinReader) ListCoin(coin string) {
-	apiCaller.Call(baseURL+"/"+coin, reflect.TypeOf((*coinDataType)(nil)))
+	resp := &coinDataResponse{}
+	apiCaller.Call(baseURL+"/"+coin, resp)
+	fmt.Printf("Succes:%v", resp.Success)
+	fmt.Printf("{\tname: %v\tpriceIncrement: %v}\n", resp.result.Name, resp.result.PriceIncrement)
 }
 
 // ListMarkets is...
 func (c CoinReader) ListMarkets(coin string) {
 
-	apiCaller.Call(baseURL, coinlListType)
+	resp := &coinListResponse{}
+	apiCaller.Call(baseURL, resp)
 
 	for _, r := range resp.Result {
 		if strings.Contains(r.Name, coin) {
