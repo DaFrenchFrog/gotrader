@@ -2,39 +2,85 @@ package main
 
 import (
 	"flag"
-	"fmt"
+	"github.com/gorilla/websocket"
 	"log"
+	"net/url"
 	"os"
-
-	"github.com/elRomano/gotrader/coinReader"
+	"os/signal"
+	"time"
 )
 
+type connRequest struct {
+	OP      string `json:"op"`
+	Channel string `json:"channel,omitempty"`
+	Market  string `json:"market,omitempty"`
+}
+
 func main() {
-	// les flags te permet de passer des parametre  du style -cur=ZECBULL/USD
-	// ici je crée un flagset pour la commande read
-	readCmd := flag.NewFlagSet("read", flag.ExitOnError)
-	// pour la commande read je met une option -cur pour preciser la currency
-	readCur := readCmd.String("cur", "ETH/USDT", "The currency to read, default:ETH/USD ")
+	flag.Parse()
+	log.SetFlags(0)
 
-	//J'ai inverser le if: fail fast et evite de faire un else
-	if len(os.Args) < 2 {
-		log.Fatal("Missing command: list or read ")
-	}
+	interrupt := make(chan os.Signal, 1)
+	signal.Notify(interrupt, os.Interrupt)
 
-	reader := coinReader.New()
-	var err error
+	u := url.URL{Scheme: "wss", Host: "ftx.com", Path: "/ws"}
+	log.Printf("connecting to %s", u.String())
 
-	switch os.Args[1] {
-	case "list":
-		err = reader.ListMarkets()
-	case "read":
-		_ = readCmd.Parse(os.Args[2:])
-		err = reader.ListCoin(*readCur)
-	default:
-		fmt.Println("command unknown")
-	}
-
+	c, _, err := websocket.DefaultDialer.Dial(u.String(), nil)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal("dial:", err)
 	}
+	defer c.Close()
+
+	done := make(chan struct{})
+
+	err = c.WriteJSON(&connRequest{OP: "subscribe", Channel: "trades", Market: "BTC-PERP"})
+	if err != nil {
+		log.Println("request error:", err)
+	}
+
+	go func() {
+		defer close(done)
+		for {
+			_, message, err := c.ReadMessage()
+			if err != nil {
+				log.Println("read:", err)
+				return
+			}
+			log.Printf("recv: %s", message)
+		}
+	}()
+
+	ticker := time.NewTicker(time.Second * 15)
+	defer ticker.Stop()
+
+	for {
+		select {
+		case <-done:
+			return
+		case <-ticker.C:
+
+			err := c.WriteJSON(&connRequest{OP: "ping"})
+			if err != nil {
+				log.Println("write:", err)
+				return
+			}
+		case <-interrupt:
+			log.Println("interrupt")
+
+			// Cleanly close the connection by sending a close message and then
+			// waiting (with timeout) for the server to close the connection.
+			err := c.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""))
+			if err != nil {
+				log.Println("write close:", err)
+				return
+			}
+			select {
+			case <-done:
+			case <-time.After(time.Second):
+			}
+			return
+		}
+	}
+
 }
