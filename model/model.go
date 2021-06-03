@@ -1,7 +1,5 @@
 package model
 
-//J'ai mi les structure de reponse dans un package a part, c'est pas obligatoire mais ca aller devenir relou au fur et a mesur d'en rajouter
-
 type Response struct {
 	Success bool `json:"success"`
 }
@@ -12,13 +10,13 @@ func (r Response) Succeed() bool {
 }
 
 type CoinListResponse struct {
-	Response            //object composition (donc implemet l'interface ci dessus)
-	Result   []CoinData `json:"result"`
+	Response
+	Result []CoinData `json:"result"`
 }
 
 type CoinDataResponse struct {
-	Response //object composition (donc implemet l'interface ci dessus)
-	Result   CoinData
+	Response
+	Result CoinData
 }
 
 type CoinData struct {
@@ -35,4 +33,27 @@ type CoinData struct {
 	PriceIncrement float32 `json:"priceIncrement"`
 	SizeIncrement  float32 `json:"sizeIncrement"`
 	Restricted     bool    `json:"restricted"`
+}
+
+// Color get color
+func Color(c string) string {
+
+	switch c {
+	case "red":
+		return string("\033[31m")
+	case "green":
+		return string("\033[32m")
+	case "yellow":
+		return string("\033[33m")
+	case "blue":
+		return string("\033[34m")
+	case "purple":
+		return string("\033[35m")
+	case "cyan":
+		return string("\033[36m")
+	case "white":
+		return string("\033[37m")
+	default:
+		return string("\033[0m")
+	}
 }

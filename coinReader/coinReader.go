@@ -2,6 +2,7 @@ package coinReader
 
 import (
 	"fmt"
+
 	"github.com/elRomano/gotrader/apiCaller"
 	"github.com/elRomano/gotrader/model"
 )
@@ -15,6 +16,10 @@ type CoinReader struct {
 // New is
 func New() CoinReader {
 	return CoinReader{}
+}
+
+func (c CoinReader) getHistory(coin string) error {
+	return nil
 }
 
 // Les fonction retournent des erreur plutot que de crasher le prog. C'est la responsabilité du main de crasher pas d'un package que tu appel
@@ -37,7 +42,6 @@ func (c CoinReader) ListCoin(coin string) error {
 
 // ListMarkets is...
 func (c CoinReader) ListMarkets() error {
-
 	resp := &model.CoinListResponse{}
 	succeed, err := apiCaller.Call(baseURL, resp)
 

@@ -7,29 +7,31 @@ import (
 	"os"
 
 	"github.com/elRomano/gotrader/coinReader"
+	"github.com/elRomano/gotrader/model"
+	"github.com/elRomano/gotrader/strategy"
 )
 
 func main() {
-	// les flags te permet de passer des parametre  du style -cur=ZECBULL/USD
-	// ici je crée un flagset pour la commande read
-	readCmd := flag.NewFlagSet("read", flag.ExitOnError)
-	// pour la commande read je met une option -cur pour preciser la currency
-	readCur := readCmd.String("cur", "ETH/USDT", "The currency to read, default:ETH/USD ")
+	readCmd := flag.NewFlagSet("backtest", flag.ExitOnError)
+	readCur := readCmd.String("mkt", "ETH/USDT", "The market to read, default:ETH/USD ")
 
-	//J'ai inverser le if: fail fast et evite de faire un else
 	if len(os.Args) < 2 {
-		log.Fatal("Missing command: list or read ")
+		log.Fatal(model.Color("red"), "Missing command: list or backtest", model.Color(""))
 	}
 
 	reader := coinReader.New()
+	strategy := strategy.New()
+
 	var err error
 
 	switch os.Args[1] {
 	case "list":
 		err = reader.ListMarkets()
-	case "read":
+	case "backtest":
 		_ = readCmd.Parse(os.Args[2:])
 		err = reader.ListCoin(*readCur)
+		strategy.Backtest()
+		fmt.Println("DONE")
 	default:
 		fmt.Println("command unknown")
 	}
