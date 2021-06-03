@@ -19,6 +19,20 @@ type CoinDataResponse struct {
 	Result CoinData
 }
 
+type CoinHistoryResponse struct {
+	Response
+	Result []CoinHistoryData
+}
+type CoinHistoryData struct {
+	Close     float32 `json:"close"`
+	High      float32 `json:"high"`
+	Low       float32 `json:"low"`
+	Open      float32 `json:"open"`
+	ClockTime float32 `json:"time"`
+	StartTime string  `json:"startTime"`
+	Volume    float32 `json:"volume"`
+}
+
 type CoinData struct {
 	Name           string  `json:"name"`
 	BaseCurrency   string  `json:"baseCurrency"`

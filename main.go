@@ -29,7 +29,7 @@ func main() {
 		err = reader.ListMarkets()
 	case "backtest":
 		_ = readCmd.Parse(os.Args[2:])
-		err = reader.ListCoin(*readCur)
+		err = reader.GetHistory(*readCur)
 		strategy.Backtest()
 		fmt.Println("DONE")
 	default:

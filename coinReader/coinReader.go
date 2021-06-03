@@ -7,7 +7,7 @@ import (
 	"github.com/elRomano/gotrader/model"
 )
 
-const baseURL = "https://ftx.com/api/markets"
+const baseURL = "https://ftx.com/api"
 
 // CoinReader is
 type CoinReader struct {
@@ -18,14 +18,29 @@ func New() CoinReader {
 	return CoinReader{}
 }
 
-func (c CoinReader) getHistory(coin string) error {
+// GetHistory is
+func (c CoinReader) GetHistory(coin string) error {
+	resp := &model.CoinHistoryResponse{}
+	succeed, err := apiCaller.Call(baseURL+"/markets/"+coin+"/candles?resolution=60", resp)
+	if err != nil {
+		return err
+	}
+	if !succeed {
+		fmt.Println("No error but no success either...")
+		return nil
+	}
+
+	for _, r := range resp.Result {
+		fmt.Printf("{\tname: %v\tbaseCurrency: %v\tclockTime: %v}\n", r.Close, r.Volume, r.ClockTime)
+	}
+	fmt.Println(len(resp.Result))
 	return nil
 }
 
-// Les fonction retournent des erreur plutot que de crasher le prog. C'est la responsabilité du main de crasher pas d'un package que tu appel
+//ListCoin is
 func (c CoinReader) ListCoin(coin string) error {
 	resp := &model.CoinDataResponse{}
-	succeed, err := apiCaller.Call(baseURL+"/"+coin, resp)
+	succeed, err := apiCaller.Call(baseURL+"/markets/"+coin, resp)
 
 	if err != nil {
 		return err
@@ -43,7 +58,7 @@ func (c CoinReader) ListCoin(coin string) error {
 // ListMarkets is...
 func (c CoinReader) ListMarkets() error {
 	resp := &model.CoinListResponse{}
-	succeed, err := apiCaller.Call(baseURL, resp)
+	succeed, err := apiCaller.Call(baseURL+"/markets", resp)
 
 	if err != nil {
 		return err
