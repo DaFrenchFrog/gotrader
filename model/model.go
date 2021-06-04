@@ -1,5 +1,8 @@
 package model
 
+import "time"
+
+//Response :
 type Response struct {
 	Success bool `json:"success"`
 }
@@ -9,30 +12,36 @@ func (r Response) Succeed() bool {
 	return r.Success
 }
 
+//CoinListResponse :
 type CoinListResponse struct {
 	Response
 	Result []CoinData `json:"result"`
 }
 
+//CoinDataResponse :
 type CoinDataResponse struct {
 	Response
 	Result CoinData
 }
 
+//CoinHistoryResponse :
 type CoinHistoryResponse struct {
 	Response
-	Result []CoinHistoryData
-}
-type CoinHistoryData struct {
-	Close     float32 `json:"close"`
-	High      float32 `json:"high"`
-	Low       float32 `json:"low"`
-	Open      float32 `json:"open"`
-	ClockTime float32 `json:"time"`
-	StartTime string  `json:"startTime"`
-	Volume    float32 `json:"volume"`
+	Result []CoinHistoryDataTicker
 }
 
+//CoinHistoryDataTicker :
+type CoinHistoryDataTicker struct {
+	Close     float32   `json:"close"`
+	High      float32   `json:"high"`
+	Low       float32   `json:"low"`
+	Open      float32   `json:"open"`
+	ClockTime float32   `json:"time"`
+	StartTime time.Time `json:"startTime"`
+	Volume    float32   `json:"volume"`
+}
+
+//CoinData :
 type CoinData struct {
 	Name           string  `json:"name"`
 	BaseCurrency   string  `json:"baseCurrency"`
@@ -47,6 +56,7 @@ type CoinData struct {
 	PriceIncrement float32 `json:"priceIncrement"`
 	SizeIncrement  float32 `json:"sizeIncrement"`
 	Restricted     bool    `json:"restricted"`
+	History        CoinHistoryDataTicker
 }
 
 // Color get color

@@ -32,8 +32,9 @@ func Call(url string, resp successable) (bool, error) {
 	if err != nil {
 		return false, err
 	}
-	bodyString := string(bodyBytes)
-	fmt.Println(model.Color("yellow"), "===> Response :", model.Color(""), bodyString)
+
+	// bodyString := string(bodyBytes)
+	// fmt.Println(model.Color("yellow"), "===> Response :", model.Color(""), bodyString)
 
 	//appel de l'unique fonction de l'interface:
 	return resp.Succeed(), nil

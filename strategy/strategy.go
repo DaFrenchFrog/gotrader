@@ -1,14 +1,22 @@
 package strategy
 
-import "fmt"
+import (
+	"fmt"
+
+	coinreader "github.com/elRomano/gotrader/coinReader"
+	"github.com/elRomano/gotrader/model"
+)
 
 type Strategy struct {
 }
 
+//New :
 func New() Strategy {
 	return Strategy{}
 }
 
-func (s Strategy) Backtest() {
-	fmt.Println("hey nice test !")
+//Backtest :
+func (s Strategy) Backtest(history coinreader.CoinReader) {
+	fmt.Printf(model.Color("purple"), "starting backtest...", model.Color(""))
+
 }

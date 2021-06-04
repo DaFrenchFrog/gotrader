@@ -6,7 +6,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/elRomano/gotrader/coinReader"
+	coinreader "github.com/elRomano/gotrader/coinReader"
 	"github.com/elRomano/gotrader/model"
 	"github.com/elRomano/gotrader/strategy"
 )
@@ -19,7 +19,7 @@ func main() {
 		log.Fatal(model.Color("red"), "Missing command: list or backtest", model.Color(""))
 	}
 
-	reader := coinReader.New()
+	reader := coinreader.New()
 	strategy := strategy.New()
 
 	var err error
@@ -29,8 +29,8 @@ func main() {
 		err = reader.ListMarkets()
 	case "backtest":
 		_ = readCmd.Parse(os.Args[2:])
-		err = reader.GetHistory(*readCur)
-		strategy.Backtest()
+		err = reader.GetCoinData(*readCur)
+		strategy.Backtest(reader)
 		fmt.Println("DONE")
 	default:
 		fmt.Println("command unknown")

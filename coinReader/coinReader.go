@@ -1,4 +1,4 @@
-package coinReader
+package coinreader
 
 import (
 	"fmt"
@@ -9,17 +9,25 @@ import (
 
 const baseURL = "https://ftx.com/api"
 
-// CoinReader is
+// CoinReader :
 type CoinReader struct {
+	Market model.CoinData
 }
 
-// New is
+// New :
 func New() CoinReader {
 	return CoinReader{}
 }
 
-// GetHistory is
-func (c CoinReader) GetHistory(coin string) error {
+//GetCoinData :
+func (c CoinReader) GetCoinData(coin string) error {
+	c.listCoin(coin)
+	c.GetCoinHistory(coin)
+	return nil
+}
+
+//GetCoinHistory :
+func (c CoinReader) GetCoinHistory(coin string) error {
 	resp := &model.CoinHistoryResponse{}
 	succeed, err := apiCaller.Call(baseURL+"/markets/"+coin+"/candles?resolution=60", resp)
 	if err != nil {
@@ -29,16 +37,18 @@ func (c CoinReader) GetHistory(coin string) error {
 		fmt.Println("No error but no success either...")
 		return nil
 	}
+	resultLength := len(resp.Result)
+	fmt.Println(model.Color("green"), "Tickers loaded : ", model.Color(""), resultLength, coin, " entries from", resp.Result[0].StartTime.String(), " to ", resp.Result[resultLength-1].StartTime.String())
 
-	for _, r := range resp.Result {
-		fmt.Printf("{\tname: %v\tbaseCurrency: %v\tclockTime: %v}\n", r.Close, r.Volume, r.ClockTime)
-	}
-	fmt.Println(len(resp.Result))
+	c.Market.History := resp.Result
+	// for _, r := range resp.Result {
+	// 	fmt.Printf("{\tname: %v\tbaseCurrency: %v\tclockTime: %v}\n", r.Close, r.Volume, r.StartTime.String())
+	// }
 	return nil
 }
 
-//ListCoin is
-func (c CoinReader) ListCoin(coin string) error {
+//ListCoin :
+func (c CoinReader) listCoin(coin string) error {
 	resp := &model.CoinDataResponse{}
 	succeed, err := apiCaller.Call(baseURL+"/markets/"+coin, resp)
 
@@ -55,7 +65,7 @@ func (c CoinReader) ListCoin(coin string) error {
 	return nil
 }
 
-// ListMarkets is...
+//ListMarkets :
 func (c CoinReader) ListMarkets() error {
 	resp := &model.CoinListResponse{}
 	succeed, err := apiCaller.Call(baseURL+"/markets", resp)
