@@ -56,7 +56,7 @@ type CoinData struct {
 	PriceIncrement float32 `json:"priceIncrement"`
 	SizeIncrement  float32 `json:"sizeIncrement"`
 	Restricted     bool    `json:"restricted"`
-	History        CoinHistoryDataTicker
+	History        []CoinHistoryDataTicker
 }
 
 // Color get color

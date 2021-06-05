@@ -3,7 +3,6 @@ package strategy
 import (
 	"fmt"
 
-	coinreader "github.com/elRomano/gotrader/coinReader"
 	"github.com/elRomano/gotrader/model"
 )
 
@@ -16,7 +15,16 @@ func New() Strategy {
 }
 
 //Backtest :
-func (s Strategy) Backtest(history coinreader.CoinReader) {
-	fmt.Printf(model.Color("purple"), "starting backtest...", model.Color(""))
+func (s Strategy) Backtest(market model.CoinData) {
+	fmt.Println(model.Color("purple"), "Starting backtest : ", market.Name+" -> testing", len(market.History), " entries", model.Color(""))
+
+	for _, v := range market.History {
+		if v.Open > v.Close {
+			fmt.Println(model.Color("red"), "Red...", model.Color(""))
+		} else {
+			fmt.Println(model.Color("green"), "Green...", model.Color(""))
+		}
+
+	}
 
 }

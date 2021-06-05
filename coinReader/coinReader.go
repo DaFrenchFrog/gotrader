@@ -40,7 +40,7 @@ func (c CoinReader) GetCoinHistory(coin string) error {
 	resultLength := len(resp.Result)
 	fmt.Println(model.Color("green"), "Tickers loaded : ", model.Color(""), resultLength, coin, " entries from", resp.Result[0].StartTime.String(), " to ", resp.Result[resultLength-1].StartTime.String())
 
-	c.Market.History := resp.Result
+	c.Market.History = resp.Result
 	// for _, r := range resp.Result {
 	// 	fmt.Printf("{\tname: %v\tbaseCurrency: %v\tclockTime: %v}\n", r.Close, r.Volume, r.StartTime.String())
 	// }

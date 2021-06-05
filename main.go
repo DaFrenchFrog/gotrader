@@ -30,7 +30,7 @@ func main() {
 	case "backtest":
 		_ = readCmd.Parse(os.Args[2:])
 		err = reader.GetCoinData(*readCur)
-		strategy.Backtest(reader)
+		strategy.Backtest(reader.Market)
 		fmt.Println("DONE")
 	default:
 		fmt.Println("command unknown")
