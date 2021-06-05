@@ -60,8 +60,8 @@ func (c CoinReader) listCoin(coin string) error {
 		return nil
 	}
 
-	fmt.Printf("name: %v\tbaseCurrency: %v\n", resp.Result.Name, resp.Result.BaseCurrency)
-
+	fmt.Println(model.Color("green"), "Market loaded: ", model.Color(""), " name: ", resp.Result.Name, "\tbaseCurrency: ", resp.Result.BaseCurrency)
+	c.Market = resp.Result
 	return nil
 }
 
