@@ -20,14 +20,14 @@ func New() CoinReader {
 }
 
 //GetCoinData :
-func (c CoinReader) GetCoinData(coin string) error {
+func (c *CoinReader) GetCoinData(coin string) error {
 	c.listCoin(coin)
 	c.GetCoinHistory(coin)
 	return nil
 }
 
 //GetCoinHistory :
-func (c CoinReader) GetCoinHistory(coin string) error {
+func (c *CoinReader) GetCoinHistory(coin string) error {
 	resp := &model.CoinHistoryResponse{}
 	succeed, err := apiCaller.Call(baseURL+"/markets/"+coin+"/candles?resolution=60", resp)
 	if err != nil {
@@ -48,7 +48,7 @@ func (c CoinReader) GetCoinHistory(coin string) error {
 }
 
 //ListCoin :
-func (c CoinReader) listCoin(coin string) error {
+func (c *CoinReader) listCoin(coin string) error {
 	resp := &model.CoinDataResponse{}
 	succeed, err := apiCaller.Call(baseURL+"/markets/"+coin, resp)
 

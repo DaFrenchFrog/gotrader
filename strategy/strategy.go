@@ -2,6 +2,7 @@ package strategy
 
 import (
 	"fmt"
+	"github.com/elRomano/gotrader/cfmt"
 
 	"github.com/elRomano/gotrader/model"
 )
@@ -20,9 +21,11 @@ func (s Strategy) Backtest(market model.CoinData) {
 
 	for _, v := range market.History {
 		if v.Open > v.Close {
-			fmt.Println(model.Color("red"), "Red...", model.Color(""))
+			cfmt.Println(cfmt.Red, "Red...")
+			//fmt.Println(model.Color("red"), "Red...", model.Color(""))
 		} else {
-			fmt.Println(model.Color("green"), "Green...", model.Color(""))
+			cfmt.Println(cfmt.Green, "Green...")
+			//fmt.Println(model.Color("green"), "Green...", model.Color(""))
 		}
 
 	}
