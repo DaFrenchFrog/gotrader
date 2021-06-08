@@ -2,11 +2,8 @@ package apiCaller
 
 import (
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"net/http"
-
-	"github.com/elRomano/gotrader/model"
 )
 
 //voila l'example de l'interface. Go fait du duck typing. c'est a dire que tu n'a pas besoin d'expicitement dire qu'une classe implement une interface.
@@ -20,7 +17,7 @@ type successable interface {
 // Ici pas besoin de reflect, tu passe directement ta variable en pointeur ici le type interface{} permet
 // de passer n'importe quel type. Mais du coup c'est forcement un pointeur
 func Call(url string, resp successable) (bool, error) {
-	fmt.Println(model.Color("yellow"), ">=== Api call : ", model.Color(""), url, "...")
+	// fmt.Println(model.Color("yellow"), ">=== Api call : ", model.Color(""), url)
 	httpResp, err := http.Get(url)
 	if err != nil {
 		return false, err

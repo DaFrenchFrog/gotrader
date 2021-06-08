@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 
+	"github.com/elRomano/gotrader/cfmt"
 	coinreader "github.com/elRomano/gotrader/coinReader"
 	"github.com/elRomano/gotrader/model"
 	"github.com/elRomano/gotrader/strategy"
@@ -31,7 +32,7 @@ func main() {
 		_ = readCmd.Parse(os.Args[2:])
 		err = reader.GetCoinData(*readCur)
 		strategy.Backtest(reader.Market)
-		fmt.Println("DONE")
+		cfmt.Println(cfmt.Cyan, "Program terminated.")
 	default:
 		fmt.Println("command unknown")
 	}
