@@ -2,30 +2,33 @@ package coinreader
 
 import (
 	"fmt"
+	"github.com/elRomano/gotrader/ftx"
 	"time"
 
-	"github.com/elRomano/gotrader/apiCaller"
 	"github.com/elRomano/gotrader/cfmt"
 	"github.com/elRomano/gotrader/model"
 )
 
-const baseURL = "https://ftx.com/api"
-
 // CoinReader :
 type CoinReader struct {
 	Market model.CoinData
+	client ftx.Client
 }
 
 // New :
 func New() CoinReader {
-	return CoinReader{}
+	return CoinReader{
+		client: ftx.Client{},
+	}
 }
 
 //GetCoinData :
 func (c *CoinReader) GetCoinData(coin string) error {
-	c.listCoin(coin)
-	c.GetCoinHistory(coin)
-	return nil
+	err := c.loadMarket(coin)
+	if err != nil {
+		return err
+	}
+	return c.GetCoinHistory(coin)
 }
 
 //GetCoinHistory :
@@ -34,8 +37,7 @@ func (c *CoinReader) GetCoinHistory(coin string) error {
 	y, m, d := startDateToLoad.Date()
 	cfmt.Println(cfmt.Purple, "Starting history loading : ", cfmt.Neutral, "starting date ", d, m, y)
 	fmt.Println("Starting time : ", startDateToLoad)
-	c.getFramedCoinHistory(coin, startDateToLoad.Unix())
-	return nil
+	return c.getFramedCoinHistory(coin, startDateToLoad.Unix())
 }
 
 //getFramedCoinHistory :
@@ -43,12 +45,12 @@ func (c *CoinReader) getFramedCoinHistory(coin string, dateStart int64) error {
 	timeframe := 60
 	endDate := dateStart + int64(1500*timeframe)
 
-	resp := &model.CoinHistoryResponse{}
-	succeed, err := apiCaller.Call(baseURL+"/markets/"+coin+"/candles?resolution=60&start_time="+fmt.Sprint(dateStart)+"&end_time="+fmt.Sprint(endDate), resp)
+	resp, err := c.client.GetCoinHistory(coin, 60, dateStart, endDate)
 	if err != nil {
 		return err
 	}
-	if !succeed {
+
+	if !resp.Success {
 		cfmt.Println(cfmt.Red, "There was an error...")
 		return nil
 	}
@@ -65,15 +67,13 @@ func (c *CoinReader) appendHistory(history []model.CoinHistoryDataTicker) {
 	c.Market.History = append(c.Market.History, history...)
 }
 
-//ListCoin :
-func (c *CoinReader) listCoin(coin string) error {
-	resp := &model.CoinDataResponse{}
-	succeed, err := apiCaller.Call(baseURL+"/markets/"+coin, resp)
+func (c *CoinReader) loadMarket(coin string) error {
+	resp, err := c.client.ListCoin(coin)
 
 	if err != nil {
 		return err
 	}
-	if !succeed {
+	if !resp.Success {
 		fmt.Println("No error but no success either...")
 		return nil
 	}
@@ -85,13 +85,12 @@ func (c *CoinReader) listCoin(coin string) error {
 
 //ListMarkets :
 func (c CoinReader) ListMarkets() error {
-	resp := &model.CoinListResponse{}
-	succeed, err := apiCaller.Call(baseURL+"/markets", resp)
+	resp, err := c.client.ListMarkets()
 
 	if err != nil {
 		return err
 	}
-	if !succeed {
+	if !resp.Success {
 		fmt.Println("No error but no success either...")
 		return nil
 	}
