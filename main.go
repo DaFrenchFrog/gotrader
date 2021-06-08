@@ -21,7 +21,8 @@ func main() {
 	}
 
 	reader := coinreader.New()
-	strategy := strategy.New()
+	runner := strategy.New(strategy.NormalStrategy{})
+	//runner := strategy.New(strategy.CrazyStrategy{}) // example de different strategy avec une interface
 
 	var err error
 
@@ -31,7 +32,7 @@ func main() {
 	case "backtest":
 		_ = readCmd.Parse(os.Args[2:])
 		err = reader.GetCoinData(*readCur)
-		strategy.Backtest(reader.Market)
+		runner.Backtest(reader.Market)
 		cfmt.Println(cfmt.Cyan, "Program terminated.")
 	default:
 		fmt.Println("command unknown")
