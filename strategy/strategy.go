@@ -7,7 +7,7 @@ import (
 	"github.com/elRomano/gotrader/model"
 )
 
-type Strategy struct {
+type wallet struct {
 	walletAmount    float32
 	cumulativeGreen int
 	cumulativeRed   int
@@ -16,40 +16,77 @@ type Strategy struct {
 	opening         float32
 }
 
+type strategy interface {
+	apply(w *wallet, ticker model.CoinHistoryDataTicker)
+}
+
+type StrategyRunner struct {
+	wallet
+	strategy strategy
+}
+
 //New :
-func New() Strategy {
-	return Strategy{}
+func New(s strategy) StrategyRunner {
+	return StrategyRunner{
+		wallet:   wallet{},
+		strategy: s,
+	}
 }
 
 //Backtest :
-func (s Strategy) Backtest(market model.CoinData) {
+func (s StrategyRunner) Backtest(market model.CoinData) {
 	s.cumulativeGreen = 0
 	s.tradeAmount = 0
 	fmt.Println(model.Color("purple"), "Starting backtest : ", market.Name+" -> testing", len(market.History), " entries", model.Color(""))
 
 	for _, v := range market.History {
-		if v.Open > v.Close {
-			s.cumulativeGreen = 0
-			if s.trading {
-				// cfmt.Println(cfmt.Red, "SELL : ", v.Close)
-				s.trading = false
-				s.walletAmount += s.opening - v.Close
-			}
-			// cfmt.Println(cfmt.Red, "Red...")
-			//fmt.Println(model.Color("red"), "Red...", model.Color(""))
-		} else {
-			// cfmt.Println(cfmt.Green, "Green...")
-			s.cumulativeGreen++
-			if s.cumulativeGreen >= 3 && !s.trading {
-				// cfmt.Println(cfmt.Green, "BUY : ", v.Close)
-				s.trading = true
-				s.opening = v.Close
-				s.tradeAmount++
-			}
-			//fmt.Println(model.Color("green"), "Green...", model.Color(""))
-		}
-
+		s.strategy.apply(&s.wallet, v)
 	}
 	cfmt.Println(cfmt.Blue, "BACKTEST FINISHED : WINNINGS : ", s.walletAmount, "$ // TRADES : ", s.tradeAmount)
+}
 
+type NormalStrategy struct {
+}
+
+func (NormalStrategy) apply(w *wallet, ticker model.CoinHistoryDataTicker) {
+	if ticker.Open > ticker.Close {
+		w.cumulativeGreen = 0
+		if w.trading {
+			// cfmt.Println(cfmt.Red, "SELL : ", v.Close)
+			w.trading = false
+			w.walletAmount += w.opening - ticker.Close
+		}
+		// cfmt.Println(cfmt.Red, "Red...")
+		//fmt.Println(model.Color("red"), "Red...", model.Color(""))
+	} else {
+		// cfmt.Println(cfmt.Green, "Green...")
+		w.cumulativeGreen++
+		if w.cumulativeGreen >= 3 && !w.trading {
+			// cfmt.Println(cfmt.Green, "BUY : ", v.Close)
+			w.trading = true
+			w.opening = ticker.Close
+			w.tradeAmount++
+		}
+		//fmt.Println(model.Color("green"), "Green...", model.Color(""))
+	}
+}
+
+type CrazyStrategy struct {
+}
+
+func (CrazyStrategy) apply(w *wallet, ticker model.CoinHistoryDataTicker) {
+	if ticker.Open < ticker.Close {
+		w.cumulativeGreen = 0
+		if w.trading {
+			w.trading = false
+			w.walletAmount += w.opening - ticker.Close
+		}
+	} else {
+		w.cumulativeGreen++
+		if w.cumulativeGreen >= 3 && !w.trading {
+			w.trading = true
+			w.opening = ticker.Close
+			w.tradeAmount++
+		}
+	}
 }

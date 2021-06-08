@@ -7,11 +7,6 @@ type Response struct {
 	Success bool `json:"success"`
 }
 
-//Succeed tells if the call succeed (c'est ca qui rempli le contrat de l'interface et qui permet de passer l'objet en param de l'api caller
-func (r Response) Succeed() bool {
-	return r.Success
-}
-
 //CoinListResponse :
 type CoinListResponse struct {
 	Response

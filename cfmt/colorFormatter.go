@@ -2,6 +2,7 @@ package cfmt
 
 import (
 	"fmt"
+	"os"
 )
 
 type Color string
@@ -21,5 +22,18 @@ const (
 func Println(color Color, a ...interface{}) {
 	fmt.Print(color)
 	fmt.Print(a...)
+	fmt.Println(Neutral)
+}
+
+func Print(color Color, a ...interface{}) {
+	fmt.Print(color)
+	fmt.Print(a...)
+	fmt.Println(Neutral)
+}
+
+// Printf formats according to a format specifier and writes to standard output with a specific color.
+func Printf(color Color, format string, a ...interface{}) {
+	fmt.Print(color)
+	fmt.Fprintf(os.Stdout, format, a...)
 	fmt.Println(Neutral)
 }
