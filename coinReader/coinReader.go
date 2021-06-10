@@ -2,12 +2,15 @@ package coinreader
 
 import (
 	"fmt"
-	"github.com/elRomano/gotrader/ftx"
 	"time"
+
+	"github.com/elRomano/gotrader/ftx"
 
 	"github.com/elRomano/gotrader/cfmt"
 	"github.com/elRomano/gotrader/model"
 )
+
+const TIMEFRAME int = 60
 
 // CoinReader :
 type CoinReader struct {
@@ -22,8 +25,8 @@ func New() CoinReader {
 	}
 }
 
-//GetCoinData :
-func (c *CoinReader) GetCoinData(coin string) error {
+//LoadCoin :
+func (c *CoinReader) LoadCoin(coin string) error {
 	err := c.loadMarket(coin)
 	if err != nil {
 		return err
@@ -33,7 +36,7 @@ func (c *CoinReader) GetCoinData(coin string) error {
 
 //GetCoinHistory :
 func (c *CoinReader) GetCoinHistory(coin string) error {
-	startDateToLoad := time.Now().AddDate(0, -1, 0)
+	startDateToLoad := time.Now().AddDate(0, 0, -7)
 	y, m, d := startDateToLoad.Date()
 	cfmt.Println(cfmt.Purple, "Starting history loading : ", cfmt.Neutral, "starting date ", d, m, y)
 	fmt.Println("Starting time : ", startDateToLoad)
@@ -42,8 +45,7 @@ func (c *CoinReader) GetCoinHistory(coin string) error {
 
 //getFramedCoinHistory :
 func (c *CoinReader) getFramedCoinHistory(coin string, dateStart int64) error {
-	timeframe := 60
-	endDate := dateStart + int64(1500*timeframe)
+	endDate := dateStart + int64(1500*TIMEFRAME)
 
 	resp, err := c.client.GetCoinHistory(coin, 60, dateStart, endDate)
 	if err != nil {
@@ -78,7 +80,7 @@ func (c *CoinReader) loadMarket(coin string) error {
 		return nil
 	}
 
-	fmt.Println(model.Color("green"), "Market loaded: ", model.Color(""), " name: ", resp.Result.Name, "\tbaseCurrency: ", resp.Result.BaseCurrency)
+	cfmt.Println(cfmt.Green, "Market loaded: ", cfmt.Neutral, " name: ", resp.Result.Name, "\tbaseCurrency: ", resp.Result.BaseCurrency)
 	c.Market = resp.Result
 	return nil
 }
