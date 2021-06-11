@@ -2,6 +2,7 @@ package ftx
 
 import (
 	"fmt"
+
 	"github.com/elRomano/gotrader/model"
 )
 
@@ -20,8 +21,9 @@ func (c Client) ListMarkets() (model.CoinListResponse, error) {
 	return marketResponse, nil
 }
 
-func (c Client) ListCoin(coin string) (model.CoinDataResponse, error) {
-	coinDataResponse := model.CoinDataResponse{}
+// ListMarket :
+func (c Client) ListMarket(coin string) (model.MarketDataResponse, error) {
+	coinDataResponse := model.MarketDataResponse{}
 	resp, err := c.get("markets/" + coin)
 
 	if err != nil {
@@ -35,7 +37,8 @@ func (c Client) ListCoin(coin string) (model.CoinDataResponse, error) {
 	return coinDataResponse, nil
 }
 
-func (c Client) GetCoinHistory(coin string, resolution int64, startTime int64, endTime int64) (model.CoinHistoryResponse, error) {
+// GetMarketHistory :
+func (c Client) GetMarketHistory(coin string, resolution int64, startTime int64, endTime int64) (model.CoinHistoryResponse, error) {
 	var historicalPrices model.CoinHistoryResponse
 	resp, err := c.get(fmt.Sprintf("markets/%v/candles?resolution=%v&start_time=%v&end_time=%v", coin, resolution, startTime, endTime))
 

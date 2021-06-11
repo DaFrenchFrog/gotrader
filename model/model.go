@@ -10,34 +10,35 @@ type Response struct {
 //CoinListResponse :
 type CoinListResponse struct {
 	Response
-	Result []CoinData `json:"result"`
+	Result []MarketData `json:"result"`
 }
 
-//CoinDataResponse :
-type CoinDataResponse struct {
+//MarketDataResponse :
+type MarketDataResponse struct {
 	Response
-	Result CoinData
+	Result MarketData
 }
 
 //CoinHistoryResponse :
 type CoinHistoryResponse struct {
 	Response
-	Result []CoinHistoryDataTicker
+	Result []Candle
 }
 
-//CoinHistoryDataTicker :
-type CoinHistoryDataTicker struct {
-	Close     float32   `json:"close"`
-	High      float32   `json:"high"`
-	Low       float32   `json:"low"`
-	Open      float32   `json:"open"`
-	ClockTime float32   `json:"time"`
-	StartTime time.Time `json:"startTime"`
-	Volume    float32   `json:"volume"`
+//Candle :
+type Candle struct {
+	Close      float32   `json:"close"`
+	High       float32   `json:"high"`
+	Low        float32   `json:"low"`
+	Open       float32   `json:"open"`
+	ClockTime  float32   `json:"time"`
+	StartTime  time.Time `json:"startTime"`
+	Volume     float32   `json:"volume"`
+	Resolution string
 }
 
-//CoinData :
-type CoinData struct {
+//MarketData :
+type MarketData struct {
 	Name           string  `json:"name"`
 	BaseCurrency   string  `json:"baseCurrency"`
 	QuoteCurrency  string  `json:"quoteCurrency"`
@@ -51,7 +52,7 @@ type CoinData struct {
 	PriceIncrement float32 `json:"priceIncrement"`
 	SizeIncrement  float32 `json:"sizeIncrement"`
 	Restricted     bool    `json:"restricted"`
-	History        []CoinHistoryDataTicker
+	History        []Candle
 }
 
 // Color get color

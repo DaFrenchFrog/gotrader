@@ -13,7 +13,7 @@ func (CrazyStrategy) init() {
 
 }
 
-func (CrazyStrategy) apply(w *account.Wallet, ticker model.CoinHistoryDataTicker) {
+func (CrazyStrategy) apply(w *account.Wallet, ticker model.Candle) {
 	if ticker.Open < ticker.Close {
 		// BUY
 	} else {
