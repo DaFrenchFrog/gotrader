@@ -51,14 +51,14 @@ func (s *StrategyRunner) Live(market string) {
 	s.reader.Load()
 
 	second := time.Tick(time.Second)
-	minute := time.Tick(time.Minute)
+	newCandle := s.reader.NewCandleChannel()
 
 	for {
 		select {
 		case <-second:
 			s.reader.GetLatestCandle()
 			// cfmt.Println(cfmt.Blue, curMarket.Market.Last)
-		case <-minute:
+		case <-newCandle:
 			// curMarket.LoadMarket(coin)
 			// cfmt.Println(cfmt.Blue, curMarket.Market.Last)
 		}
