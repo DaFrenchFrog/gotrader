@@ -59,7 +59,7 @@ func (s *StrategyRunner) Live(market string) {
 			s.reader.GetLatestCandle()
 			// cfmt.Println(cfmt.Blue, curMarket.Market.Last)
 		case <-newCandle:
-			// curMarket.LoadMarket(coin)
+			s.strategy.apply(&s.wallet, newCandle)
 			// cfmt.Println(cfmt.Blue, curMarket.Market.Last)
 		}
 	}
