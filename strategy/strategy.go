@@ -51,16 +51,19 @@ func (s *StrategyRunner) Live(market string) {
 	s.reader.Load()
 
 	second := time.Tick(time.Second)
-	newCandle := s.reader.NewCandleChannel()
+	newCandle := s.reader.GetNewCandleChannel()
+
+	go func() {
+		for candle := range newCandle {
+			cfmt.Printf(cfmt.Blue, "New candle!! high: %v low:%v", candle.High, candle.Low)
+			s.strategy.apply(&s.wallet, candle)
+		}
+	}()
 
 	for {
-		select {
-		case <-second:
+		for range second {
 			s.reader.GetLatestCandle()
-			// cfmt.Println(cfmt.Blue, curMarket.Market.Last)
-		case <-newCandle:
-			s.strategy.apply(&s.wallet, newCandle)
-			// cfmt.Println(cfmt.Blue, curMarket.Market.Last)
 		}
 	}
+
 }

@@ -21,8 +21,9 @@ type MarketReader struct {
 // NewReader :
 func NewReader(mkt string) MarketReader {
 	return MarketReader{
-		MarketName: mkt,
-		client:     ftx.Client{},
+		MarketName:       mkt,
+		client:           ftx.Client{},
+		newCandleChannel: make(chan model.Candle),
 	}
 }
 
@@ -45,7 +46,6 @@ func (m *MarketReader) GetMarketHistory() error {
 
 //GetLatestCandle :
 func (m *MarketReader) GetLatestCandle() error {
-
 	resp, err := m.client.GetMarketHistory(m.MarketName, 60, time.Now().Add(-time.Minute*2).Unix(), time.Now().Unix())
 	if err != nil {
 		return err
@@ -67,9 +67,8 @@ func (m *MarketReader) GetLatestCandle() error {
 }
 
 //NewCandleChannel :
-func (m *MarketReader) NewCandleChannel() chan model.Candle {
-	m.newCandleChannel = make(chan model.Candle)
-	return &m.newCandleChannel
+func (m *MarketReader) GetNewCandleChannel() <-chan model.Candle {
+	return m.newCandleChannel
 }
 
 //getFramedCoinHistory :
