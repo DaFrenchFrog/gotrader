@@ -31,10 +31,10 @@ func New(s strategy, w account.Wallet) StrategyRunner {
 }
 
 //Backtest :
-func (s StrategyRunner) Backtest(market string) {
+func (s *StrategyRunner) Backtest(market string) {
 	reader := markets.NewReader(market)
 	reader.Load()
-
+	s.marketData = reader.Data
 	s.strategy.init()
 
 	cfmt.Println(cfmt.Purple, "Starting backtest : ", s.marketData.Name+" -> testing ", len(s.marketData.History), " entries", cfmt.Neutral)

@@ -38,9 +38,8 @@ func (m *MarketReader) Load() error {
 
 //GetMarketHistory :
 func (m *MarketReader) GetMarketHistory() error {
-	startDateToLoad := time.Now().AddDate(0, 0, -1)
+	startDateToLoad := time.Now().AddDate(-1, 0, 0)
 	cfmt.Println(cfmt.Purple, "Starting history loading : ", cfmt.Neutral, "starting date ", startDateToLoad.Format("2 Jan 2006"))
-	fmt.Println("Starting time : ", startDateToLoad)
 	return m.getFramedHistory(startDateToLoad.Unix())
 }
 

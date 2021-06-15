@@ -15,6 +15,7 @@ type NormalStrategy struct {
 	cumulativeRed   int
 }
 
+//NewNormalStrategy :
 func NewNormalStrategy() *NormalStrategy {
 	return &NormalStrategy{
 		cumulativeGreen: 0,
