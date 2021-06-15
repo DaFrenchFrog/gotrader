@@ -1,6 +1,8 @@
 package strategy
 
 import (
+	"fmt"
+	"github.com/elRomano/gotrader/store"
 	"time"
 
 	"github.com/elRomano/gotrader/account"
@@ -20,19 +22,21 @@ type StrategyRunner struct {
 	strategy   strategy
 	reader     markets.MarketReader
 	marketData model.MarketData
+	store      store.HistoryStore
 }
 
 //New :
-func New(s strategy, w account.Wallet) StrategyRunner {
+func New(s strategy, w account.Wallet, store store.HistoryStore) StrategyRunner {
 	return StrategyRunner{
 		wallet:   w,
 		strategy: s,
+		store:    store,
 	}
 }
 
 //Backtest :
 func (s *StrategyRunner) Backtest(market string) {
-	reader := markets.NewReader(market)
+	reader := markets.NewReader(market, s.store)
 	reader.Load()
 	s.marketData = reader.Data
 	s.strategy.init()
@@ -43,11 +47,19 @@ func (s *StrategyRunner) Backtest(market string) {
 		s.strategy.apply(&s.wallet, v)
 	}
 	cfmt.Println(cfmt.Blue, "BACKTEST FINISHED : WINNINGS : ", s.wallet.WalletAmount, "$ // TRADES : ", s.wallet.TradeAmount)
+
+	dataFromDb, err := s.store.GetAll()
+	if err != nil {
+		cfmt.Printf(cfmt.Red, "Shit, %v", err)
+	}
+	for _, candle := range dataFromDb {
+		fmt.Println(candle)
+	}
 }
 
 //Live :
 func (s *StrategyRunner) Live(market string) {
-	s.reader = markets.NewReader(market)
+	s.reader = markets.NewReader(market, s.store)
 	s.reader.Load()
 
 	second := time.Tick(time.Second)
