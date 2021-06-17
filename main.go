@@ -3,8 +3,11 @@ package main
 import (
 	"flag"
 	"fmt"
+	"github.com/boltdb/bolt"
+	"github.com/elRomano/gotrader/store/boltdb"
 	"log"
 	"os"
+	"time"
 
 	"github.com/elRomano/gotrader/account"
 	"github.com/elRomano/gotrader/cfmt"
@@ -29,18 +32,28 @@ func main() {
 
 	var err error
 
+	db, err := bolt.Open("./gotrader.db", 0600, &bolt.Options{Timeout: 1 * time.Second})
+	if err != nil {
+		log.Fatalf("could not open bolt db file,  %v", err)
+	}
+	defer db.Close()
+	store, err := boltdb.NewHistoryDataStore(db, "marketData")
+	if err != nil {
+		log.Fatalf("could not create market data store,  %v", err)
+	}
+
 	switch os.Args[1] {
 	case "list":
 		marketList := markets.NewLister()
 		err = marketList.ListMarkets()
 	case "backtest":
 		_ = readCmd.Parse(os.Args[2:])
-		runner := strategy.New(strategy.NewNormalStrategy(), account.Wallet{})
+		runner := strategy.New(strategy.NewNormalStrategy(), account.Wallet{}, store)
 		runner.Backtest(*readMkt)
 		cfmt.Println(cfmt.Cyan, "|||||||||||||||||||||||||||||||||||||||||||||| Program terminated.")
 	case "live":
 		_ = liveCmd.Parse(os.Args[2:])
-		runner := strategy.New(strategy.NewNormalStrategy(), account.Wallet{})
+		runner := strategy.New(strategy.NewNormalStrategy(), account.Wallet{}, store)
 		runner.Live(*liveMkt)
 
 	default:

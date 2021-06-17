@@ -2,6 +2,7 @@ package markets
 
 import (
 	"fmt"
+	"github.com/elRomano/gotrader/store"
 	"time"
 
 	"github.com/elRomano/gotrader/ftx"
@@ -16,14 +17,16 @@ type MarketReader struct {
 	Data             model.MarketData
 	client           ftx.Client
 	newCandleChannel chan model.Candle
+	store            store.HistoryStore
 }
 
 // NewReader :
-func NewReader(mkt string) MarketReader {
+func NewReader(mkt string, store store.HistoryStore) MarketReader {
 	return MarketReader{
 		MarketName:       mkt,
 		client:           ftx.Client{},
 		newCandleChannel: make(chan model.Candle),
+		store:            store,
 	}
 }
 
@@ -38,7 +41,7 @@ func (m *MarketReader) Load() error {
 
 //GetMarketHistory :
 func (m *MarketReader) GetMarketHistory() error {
-	startDateToLoad := time.Now().AddDate(-1, 0, 0)
+	startDateToLoad := time.Now().AddDate(0, -1, 0)
 	cfmt.Println(cfmt.Purple, "Starting history loading : ", cfmt.Neutral, "starting date ", startDateToLoad.Format("2 Jan 2006"))
 	return m.getFramedHistory(startDateToLoad.Unix())
 }
@@ -85,6 +88,11 @@ func (m *MarketReader) getFramedHistory(dateStart int64) error {
 	}
 	resultLength := len(resp.Result)
 	cfmt.Println(cfmt.Green, "Tickers loaded : ", cfmt.Neutral, resultLength, " ", m.MarketName, " entries from \t", resp.Result[0].StartTime.Format("2 Jan 2006 15:04"), " to \t", resp.Result[resultLength-1].StartTime.Format("2 Jan 2006 15:04"))
+
+	err = m.store.SaveBatch(resp.Result)
+	if err != nil {
+		cfmt.Printf(cfmt.Red, "oops can't save because, %v", err)
+	}
 
 	m.appendHistory(resp.Result)
 	if endDate < time.Now().Unix() {
