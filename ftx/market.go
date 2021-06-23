@@ -21,8 +21,8 @@ func (c Client) ListMarkets() (model.CoinListResponse, error) {
 	return marketResponse, nil
 }
 
-// ListMarket :
-func (c Client) ListMarket(coin string) (model.MarketDataResponse, error) {
+// GetMarketSummary :
+func (c Client) GetMarketSummary(coin string) (model.MarketDataResponse, error) {
 	coinDataResponse := model.MarketDataResponse{}
 	resp, err := c.get("markets/" + coin)
 

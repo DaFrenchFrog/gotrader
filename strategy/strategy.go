@@ -1,9 +1,10 @@
 package strategy
 
 import (
-	"fmt"
-	"github.com/elRomano/gotrader/store"
+	"log"
 	"time"
+
+	"github.com/elRomano/gotrader/store"
 
 	"github.com/elRomano/gotrader/account"
 	"github.com/elRomano/gotrader/cfmt"
@@ -18,49 +19,52 @@ type strategy interface {
 
 //StrategyRunner :
 type StrategyRunner struct {
-	wallet     account.Wallet
-	strategy   strategy
-	reader     markets.MarketReader
-	marketData model.MarketData
-	store      store.HistoryStore
+	wallet   account.Wallet
+	strategy strategy
+	reader   markets.MarketReader
+	// marketData []model.MarketData
+	// store store.HistoryStore
 }
 
 //New :
-func New(s strategy, w account.Wallet, store store.HistoryStore) StrategyRunner {
+func New(marketList []string, s strategy, w account.Wallet, store store.HistoryStore) StrategyRunner {
 	return StrategyRunner{
 		wallet:   w,
 		strategy: s,
-		store:    store,
+		reader:   markets.NewReader(marketList, store),
+		// store:    store,
 	}
 }
 
-//Backtest :
-func (s *StrategyRunner) Backtest(market string) {
-	reader := markets.NewReader(market, s.store)
-	reader.Load()
-	s.marketData = reader.Data
-	s.strategy.init()
+//LaunchBacktest :
+func (s *StrategyRunner) LaunchBacktest() {
 
-	cfmt.Println(cfmt.Purple, "Starting backtest : ", s.marketData.Name+" -> testing ", len(s.marketData.History), " entries", cfmt.Neutral)
-
-	for _, v := range s.marketData.History {
-		s.strategy.apply(&s.wallet, v)
-	}
-	cfmt.Println(cfmt.Blue, "BACKTEST FINISHED : WINNINGS : ", s.wallet.WalletAmount, "$ // TRADES : ", s.wallet.TradeAmount)
-
-	dataFromDb, err := s.store.GetAll()
+	err := s.reader.Load()
 	if err != nil {
-		cfmt.Printf(cfmt.Red, "Shit, %v", err)
+		log.Fatalf("Error loading data, %v", err)
 	}
-	for _, candle := range dataFromDb {
-		fmt.Println(candle)
+	s.strategy.init()
+	for _, mData := range s.reader.Data {
+		cfmt.Println(cfmt.Blue, "Starting backtest : ", mData.Name+" -> testing ", len(s.reader.Data[mData.Name].History), " entries", cfmt.Neutral)
+
+		for _, v := range s.reader.Data[mData.Name].History {
+			s.strategy.apply(&s.wallet, v)
+		}
+		cfmt.Println(cfmt.Purple, "BACKTEST FINISHED : WINNINGS : ", s.wallet.WalletAmount, "$ // TRADES : ", s.wallet.TradeAmount)
+
 	}
+
+	// dataFromDb, err := s.store.GetAll()
+	// if err != nil {
+	// 	cfmt.Printf(cfmt.Red, "Shit, %v", err)
+	// }
+	// for _, candle := range dataFromDb {
+	// 	fmt.Println(candle)
+	// }
 }
 
 //Live :
-func (s *StrategyRunner) Live(market string) {
-	s.reader = markets.NewReader(market, s.store)
-	s.reader.Load()
+func (s *StrategyRunner) Live(market []string) {
 
 	second := time.Tick(time.Second)
 	newCandle := s.reader.GetNewCandleChannel()
@@ -74,7 +78,7 @@ func (s *StrategyRunner) Live(market string) {
 
 	for {
 		for range second {
-			s.reader.GetLatestCandle()
+			// s.reader.GetLatestCandle()
 		}
 	}
 
