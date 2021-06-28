@@ -2,6 +2,7 @@ package markets
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/elRomano/gotrader/ftx"
 )
@@ -31,7 +32,10 @@ func (m MarketLister) ListMarkets() error {
 	}
 
 	for _, r := range resp.Result {
-		fmt.Printf("{\tname: %v\tbaseCurrency: %v}\n", r.Name, r.BaseCurrency)
+		// fmt.Printf("{\tname: %v\tbaseCurrency: %v}\n", r.Name, r.BaseCurrency)
+		if strings.Contains(r.Name, "BULL/USDT") {
+			fmt.Print(r.Name, " ")
+		}
 	}
 	return nil
 }

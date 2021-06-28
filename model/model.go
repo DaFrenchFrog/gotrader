@@ -55,6 +55,9 @@ type MarketData struct {
 	History        []Candle
 }
 
+// Layout format for date logging
+const DateLayoutLog = "02 Jan 2006 15h04"
+
 // Color get color
 func Color(c string) string {
 

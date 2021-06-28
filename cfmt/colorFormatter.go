@@ -25,10 +25,11 @@ func Println(color Color, a ...interface{}) {
 	fmt.Println(Neutral)
 }
 
+// Print :
 func Print(color Color, a ...interface{}) {
 	fmt.Print(color)
 	fmt.Print(a...)
-	fmt.Println(Neutral)
+	fmt.Print(Neutral)
 }
 
 // Printf formats according to a format specifier and writes to standard output with a specific color.

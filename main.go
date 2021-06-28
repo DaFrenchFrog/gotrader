@@ -15,12 +15,20 @@ import (
 	"github.com/elRomano/gotrader/markets"
 	"github.com/elRomano/gotrader/model"
 	"github.com/elRomano/gotrader/strategy"
+
+	_ "net/http/pprof"
 )
 
 func main() {
-	marketList := []string{"BTC/USD", "ETH/USD"}
+
+	// go func() {
+	// 	fmt.Println(http.ListenAndServe("localhost:6060", nil))
+	// }()
+	// runtime.SetBlockProfileRate(1)
+
+	cfmt.Println(cfmt.Cyan, "\nStarting program ||||||||||||||||||||||||||||||||||||||||||||||")
+	marketList := []string{"BTC/USDT", "ETH/USDT", "DEFI-PERP", "SHIT-PERP", "ALT-PERP"}
 	readCmd := flag.NewFlagSet("backtest", flag.ExitOnError)
-	// readMkt := readCmd.String("mkt", "ETH/USDT", "The market to read, default:ETH/USD ")
 
 	liveCmd := flag.NewFlagSet("live", flag.ExitOnError)
 	// liveMkt := liveCmd.String("mkt", "ETH/USDT", "The market to trade with, default:ETH/USD ")
@@ -45,30 +53,33 @@ func main() {
 	}
 
 	switch os.Args[1] {
-	case "updateDb":
-		cfmt.Println(cfmt.Blue, "Launching database update...")
-		//We check db and insert new candles
+	case "updatedb":
+		cfmt.Println(cfmt.Yellow, "Launching database update...")
+		err = store.UpdateDb(marketList)
+		if err != nil {
+			log.Fatal("Error updating database : ", err)
+		}
 	case "showdb":
-		cfmt.Println(cfmt.Blue, "Listing database content...")
+		cfmt.Println(cfmt.Yellow, "Listing database content...")
 		boltdb.ShowBucketContent(db)
 	case "list":
-		cfmt.Println(cfmt.Blue, "Listing markets...")
+		cfmt.Println(cfmt.Yellow, "Listing markets...")
 		marketList := markets.NewLister()
 		err = marketList.ListMarkets()
 	case "backtest":
-		cfmt.Println(cfmt.Blue, "Launching backtest on ", marketList, "...")
+		cfmt.Println(cfmt.Yellow, "Launching backtest on ", marketList, "...")
 		_ = readCmd.Parse(os.Args[2:])
 		runner := strategy.New(marketList, strategy.NewNormalStrategy(), account.Wallet{}, store)
 		runner.LaunchBacktest()
 	case "live":
-		cfmt.Println(cfmt.Blue, "Let's lose some money baby !")
+		cfmt.Println(cfmt.Yellow, "Let's lose some money baby !")
 		_ = liveCmd.Parse(os.Args[2:])
 		runner := strategy.New(marketList, strategy.NewNormalStrategy(), account.Wallet{}, store)
 		runner.Live(marketList)
 	default:
 		fmt.Println("command unknown")
 	}
-	cfmt.Println(cfmt.Cyan, "|||||||||||||||||||||||||||||||||||||||||||||| Program terminated.")
+	cfmt.Println(cfmt.Cyan, "|||||||||||||||||||||||||||||||||||||||||||||| Program terminated.\n")
 
 	if err != nil {
 		log.Fatal(err)
