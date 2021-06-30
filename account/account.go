@@ -2,15 +2,19 @@ package account
 
 //Wallet :
 type Wallet struct {
-	WalletAmount float32
-	Trading      bool
-	TradeAmount  int
-	Opening      float32
+	Balance map[string]float32
 }
 
 //New :
-func New(amount float32) Wallet {
+func New() Wallet {
 	return Wallet{
-		WalletAmount: amount,
+		Balance: map[string]float32{},
+	}
+}
+
+//RegisterMarkets :
+func (w *Wallet) RegisterMarkets(markets []string, amount float32) {
+	for _, m := range markets {
+		w.Balance[m] = amount
 	}
 }

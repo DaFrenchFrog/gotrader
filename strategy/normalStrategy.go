@@ -13,6 +13,8 @@ import (
 type NormalStrategy struct {
 	cumulativeGreen int
 	cumulativeRed   int
+	WinLoseTrades   map[bool]int
+	position        Position
 }
 
 //NewNormalStrategy :
@@ -20,35 +22,47 @@ func NewNormalStrategy() *NormalStrategy {
 	return &NormalStrategy{
 		cumulativeGreen: 0,
 		cumulativeRed:   0,
+		WinLoseTrades:   map[bool]int{},
 	}
 }
 
 func (s *NormalStrategy) init() {
 	s.cumulativeGreen = 0
 	s.cumulativeRed = 0
+	s.WinLoseTrades = map[bool]int{}
+	s.position = Position{}
 }
 
-func (s *NormalStrategy) apply(w *account.Wallet, ticker model.Candle) {
+func (s *NormalStrategy) apply(w *account.Wallet, ticker model.Candle, market string) {
 	// cfmt.Println("-> ", &s.cumulativeGreen)
 	// showTicker(ticker)
 	if ticker.Open > ticker.Close {
 		// cfmt.Println(cfmt.Red, "SELL : ", ticker.Close)
 		s.cumulativeGreen = 0
-		if w.Trading {
-
-			w.Trading = false
-			w.WalletAmount += w.Opening - ticker.Close
+		if s.position != (Position{}) {
+			isWinning := false
+			w.Balance[market], isWinning = s.position.Close(ticker.Close)
+			s.WinLoseTrades[isWinning]++
 		}
 	} else {
 		// cfmt.Println(cfmt.Green, "Green...")
 		s.cumulativeGreen++
-		if s.cumulativeGreen >= 3 && !w.Trading {
+		if s.cumulativeGreen >= 3 && s.position == (Position{}) {
 			// cfmt.Println(cfmt.Green, "BUY : ", v.Close)
-			w.Trading = true
-			w.Opening = ticker.Close
-			w.TradeAmount++
+			s.position = NewPosition("long", ticker.Close, (w.Balance[market]*.1)/ticker.Close)
+			w.Balance[market] = 0
 		}
 	}
+}
+
+//WinningTrades :
+func (s *NormalStrategy) WinningTrades() int {
+	return s.WinLoseTrades[true]
+}
+
+//LosingTrades :
+func (s *NormalStrategy) LosingTrades() int {
+	return s.WinLoseTrades[false]
 }
 
 func showTicker(ticker model.Candle) {

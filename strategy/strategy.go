@@ -14,7 +14,9 @@ import (
 
 type strategy interface {
 	init()
-	apply(w *account.Wallet, ticker model.Candle)
+	apply(w *account.Wallet, ticker model.Candle, market string)
+	WinningTrades() int
+	LosingTrades() int
 }
 
 //StrategyRunner :
@@ -43,24 +45,18 @@ func (s *StrategyRunner) LaunchBacktest() {
 	if err != nil {
 		log.Fatalf("Error loading data, %v", err)
 	}
-	s.strategy.init()
 	for _, mData := range s.reader.Data {
-		cfmt.Println(cfmt.Blue, "Starting backtest : ", mData.Name+" -> testing ", len(s.reader.Data[mData.Name].History), " entries", cfmt.Neutral)
+		s.strategy.init()
+		candleAmount := len(s.reader.Data[mData.Name].History)
+		cfmt.Println(cfmt.Blue, "Starting backtest : ", mData.Name+" -> testing ", candleAmount, " entries from ", mData.History[0].StartTime.Format(model.DateLayoutLog), cfmt.Neutral)
 
 		for _, v := range s.reader.Data[mData.Name].History {
-			s.strategy.apply(&s.wallet, v)
+			s.strategy.apply(&s.wallet, v, mData.Name)
 		}
-		cfmt.Println(cfmt.Purple, "BACKTEST FINISHED : WINNINGS : ", s.wallet.WalletAmount, "$ // TRADES : ", s.wallet.TradeAmount)
-
+		dailyAverage := candleAmount / 60 / 24
+		cfmt.
+			Println(cfmt.Purple, "BACKTEST FINISHED : ", cfmt.Neutral, int(s.wallet.Balance[mData.Name]/float32(dailyAverage)), "$/day \t", s.wallet.Balance[mData.Name], "$ total \t win/lose trades : ", s.strategy.WinningTrades(), "/", s.strategy.LosingTrades())
 	}
-
-	// dataFromDb, err := s.store.GetAll()
-	// if err != nil {
-	// 	cfmt.Printf(cfmt.Red, "Shit, %v", err)
-	// }
-	// for _, candle := range dataFromDb {
-	// 	fmt.Println(candle)
-	// }
 }
 
 //Live :
@@ -72,7 +68,7 @@ func (s *StrategyRunner) Live(market []string) {
 	go func() {
 		for candle := range newCandle {
 			cfmt.Printf(cfmt.Blue, "New candle!! high: %v low:%v", candle.High, candle.Low)
-			s.strategy.apply(&s.wallet, candle)
+			// s.strategy.apply(&s.wallet, candle,)
 		}
 	}()
 
@@ -81,5 +77,4 @@ func (s *StrategyRunner) Live(market []string) {
 			// s.reader.GetLatestCandle()
 		}
 	}
-
 }

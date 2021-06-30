@@ -21,26 +21,18 @@ import (
 
 func main() {
 
-	// go func() {
-	// 	fmt.Println(http.ListenAndServe("localhost:6060", nil))
-	// }()
-	// runtime.SetBlockProfileRate(1)
-
 	cfmt.Println(cfmt.Cyan, "\nStarting program ||||||||||||||||||||||||||||||||||||||||||||||")
-	marketList := []string{"BTC/USDT", "ETH/USDT", "DEFI-PERP", "SHIT-PERP", "ALT-PERP"}
+	marketList := []string{"BTC/USDT", "ETH/USDT", "DEFI-PERP" /*"SHIT-PERP", "ALT-PERP",*/, "BULL/USDT", "BEAR/USDT", "ETHBULL/USDT", "ETHBEAR/USDT"}
 	readCmd := flag.NewFlagSet("backtest", flag.ExitOnError)
 
 	liveCmd := flag.NewFlagSet("live", flag.ExitOnError)
-	// liveMkt := liveCmd.String("mkt", "ETH/USDT", "The market to trade with, default:ETH/USD ")
 
 	if len(os.Args) < 2 {
 		log.Fatal(model.Color("red"), "Missing command: list or backtest", model.Color(""))
 	}
 
-	// reader := coinreader.New()
-	//runner := strategy.New(strategy.CrazyStrategy{}) // example de different strategy avec une interface
-
-	var err error
+	fakeWallet := account.New()
+	fakeWallet.RegisterMarkets(marketList, 1000)
 
 	db, err := bolt.Open("./gotrader.db", 0600, &bolt.Options{Timeout: 1 * time.Second})
 	if err != nil {
@@ -69,12 +61,12 @@ func main() {
 	case "backtest":
 		cfmt.Println(cfmt.Yellow, "Launching backtest on ", marketList, "...")
 		_ = readCmd.Parse(os.Args[2:])
-		runner := strategy.New(marketList, strategy.NewNormalStrategy(), account.Wallet{}, store)
+		runner := strategy.New(marketList, strategy.NewNormalStrategy(), fakeWallet, store)
 		runner.LaunchBacktest()
 	case "live":
 		cfmt.Println(cfmt.Yellow, "Let's lose some money baby !")
 		_ = liveCmd.Parse(os.Args[2:])
-		runner := strategy.New(marketList, strategy.NewNormalStrategy(), account.Wallet{}, store)
+		runner := strategy.New(marketList, strategy.NewNormalStrategy(), fakeWallet, store)
 		runner.Live(marketList)
 	default:
 		fmt.Println("command unknown")
