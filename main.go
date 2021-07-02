@@ -22,13 +22,13 @@ import (
 func main() {
 
 	cfmt.Println(cfmt.Cyan, "\nStarting program ||||||||||||||||||||||||||||||||||||||||||||||")
-	marketList := []string{"BTC/USDT", "ETH/USDT", "DEFI-PERP" /*"SHIT-PERP", "ALT-PERP",*/, "BULL/USDT", "BEAR/USDT", "ETHBULL/USDT", "ETHBEAR/USDT"}
-	readCmd := flag.NewFlagSet("backtest", flag.ExitOnError)
-
+	marketList := []string{"BTC/USDT" /*, "ETH/USDT", "DEFI-PERP" ,"SHIT-PERP", "ALT-PERP", "BULL/USDT", "BEAR/USDT", "ETHBULL/USDT", "ETHBEAR/USDT"*/}
+	backtestCmd := flag.NewFlagSet("backtest", flag.ExitOnError)
+	backtestSpeedCmd := backtestCmd.String("term", "long", "'day', 'month','year','all'")
 	liveCmd := flag.NewFlagSet("live", flag.ExitOnError)
 
 	if len(os.Args) < 2 {
-		log.Fatal(model.Color("red"), "Missing command: list or backtest", model.Color(""))
+		log.Fatal(model.Color("red"), "Missing command: list, backtest, updatedb, showdb, or live", model.Color(""))
 	}
 
 	fakeWallet := account.New()
@@ -60,9 +60,9 @@ func main() {
 		err = marketList.ListMarkets()
 	case "backtest":
 		cfmt.Println(cfmt.Yellow, "Launching backtest on ", marketList, "...")
-		_ = readCmd.Parse(os.Args[2:])
+		_ = backtestCmd.Parse(os.Args[2:])
 		runner := strategy.New(marketList, strategy.NewNormalStrategy(), fakeWallet, store)
-		runner.LaunchBacktest()
+		runner.LaunchBacktest(*backtestSpeedCmd)
 	case "live":
 		cfmt.Println(cfmt.Yellow, "Let's lose some money baby !")
 		_ = liveCmd.Parse(os.Args[2:])

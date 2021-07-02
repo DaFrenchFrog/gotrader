@@ -37,21 +37,36 @@ func NewReader(marketNames []string, store store.HistoryStore) MarketReader {
 }
 
 //Load :
-func (m *MarketReader) Load() error {
+func (m *MarketReader) Load(term string) error {
 	for _, mData := range m.Data {
-		cfmt.Println(cfmt.Blue, "Loading ", mData.Name, " market...")
+		cfmt.Println(cfmt.Blue, "[1/3] Loading ", mData.Name, " market...")
 		m.loadMarketSummary(mData.Name)
-		cfmt.Println(cfmt.Blue, "Market summary loaded. Loading history...", cfmt.Neutral)
+		cfmt.Print(cfmt.Blue, "[2/3] Loading history ")
 		if m.store.MarketExist(mData.Name) {
-			m.Data[mData.Name].History, _ = m.store.GetMarketHistory(mData.Name)
+			m.Data[mData.Name].History, _ = m.store.GetMarketHistory(mData.Name, term)
 		} else {
 			cfmt.Println(cfmt.Yellow, "Market ", mData.Name, " does not exist in database. Run -update to retrieve data.")
 		}
+		cfmt.Println(cfmt.Blue, "[3/3] Adding indicators...", cfmt.Neutral)
+		m.addIndicators(m.Data[mData.Name].History)
 		cfmt.Println(cfmt.Green, mData.Name, " loaded : ", cfmt.Neutral, len(m.Data[mData.Name].History), " entries from ", m.Data[mData.Name].History[0].StartTime.Format(model.DateLayoutLog))
 	}
-
 	return nil
 	// return m.GetMarketHistory()
+}
+
+func (m *MarketReader) addIndicators(candles []model.Candle) {
+	// i := 0
+	for i := range candles {
+		candles[i].SMA200 = getSMA(200, candles, i)
+		candles[i].ATR14 = getATR(14, candles, i)
+		candles[i].ATR7 = getATR(7, candles, i)
+		candles[i].STrend = getSupertrend(2, candles, i)
+
+		if i < 10 {
+			cfmt.Println(cfmt.Yellow, "candles[", i, "].STrend ", candles[i].STrend.BasicLowerBand, "    ", candles[i].STrend.BasicUpperBand)
+		}
+	}
 }
 
 //GetNewCandleChannel :

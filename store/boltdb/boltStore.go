@@ -23,8 +23,6 @@ type historyDataStore struct {
 const mainBucket = "marketsData"
 
 const dateOrigin = "13-09-2018 15:15:00"
-
-// const dateOrigin = "24-06-2021 15:15:00"
 const dateLayout = "02-01-2006 15:04:05"
 
 //SetHistoryDataStore :
@@ -197,24 +195,31 @@ func (s historyDataStore) getLatestDateKey(mkt string) time.Time {
 
 // 	return err
 // }
-func (s historyDataStore) GetMarketHistory(bucket string) ([]model.Candle, error) {
+func (s historyDataStore) GetMarketHistory(bucket string, term string) ([]model.Candle, error) {
 	result := []model.Candle{}
 	err := s.db.View(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte(mainBucket)).Bucket([]byte(bucket))
-		err := b.ForEach(func(k, v []byte) error {
+		c := b.Cursor()
+		key, _ := c.Seek(s.getStartingKeyToLoad(b, term))
+		cfmt.Println(cfmt.Blue, "since ", time.Unix(btoi(key), 0).Format(model.DateLayoutLog))
+		for k, v := c.Seek(key); k != nil; k, v = c.Next() {
+			// fmt.Printf("key=%s, value=%s\n", k, v)
+			// }
+			// err := b.ForEach(func(k, v []byte) error {
 			md := model.Candle{}
 			err := json.Unmarshal(v, &md)
+
 			if err != nil {
+				fmt.Println("EEERRERRRk=", k)
 				return err
 			}
 			result = append(result, md)
 
-			return nil
-		})
-
-		if err != nil {
-			return err
 		}
+
+		// if err != nil {
+		// 	return err
+		// }
 
 		return nil
 	})
@@ -222,6 +227,31 @@ func (s historyDataStore) GetMarketHistory(bucket string) ([]model.Candle, error
 		return nil, err
 	}
 	return result, nil
+}
+
+func (s historyDataStore) getStartingKeyToLoad(b *bolt.Bucket, term string) []byte {
+	candleAmount := int64(0)
+	switch term {
+	case "day":
+		//1 day in seconds
+		candleAmount = 60 * 60 * 24
+	case "month":
+		//1 month in seconds
+		candleAmount = 60 * 60 * 24 * 30
+	case "year":
+		//1 year in seconds
+		candleAmount = 60 * 60 * 24 * 365
+	default:
+		//all data
+		candleAmount = 0
+	}
+	c := b.Cursor()
+	k, _ := c.Last()
+	if candleAmount == 0 {
+		k, _ = c.First()
+	}
+	n := btoi(k)
+	return []byte(itob(n - candleAmount))
 }
 
 func (s historyDataStore) GetAll() ([]model.Candle, error) {
@@ -305,7 +335,7 @@ func ShowBucketContent(db *bolt.DB) {
 					return nil
 				})
 			}
-			cfmt.Println(cfmt.Green, "Martket ", string(k), cfmt.Neutral, " => ", nbEntries, " candles from ", firstDate.Format(model.DateLayoutLog), " to ", lastDate.Format(model.DateLayoutLog))
+			cfmt.Println(cfmt.Green, "Martket ", string(k), cfmt.Neutral, "\t => \t", nbEntries, " candles from \t", firstDate.Format(model.DateLayoutLog), " to \t", lastDate.Format(model.DateLayoutLog))
 			return nil
 		})
 		return nil

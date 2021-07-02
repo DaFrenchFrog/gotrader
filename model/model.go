@@ -1,6 +1,10 @@
 package model
 
-import "time"
+import (
+	"time"
+
+	"github.com/elRomano/gotrader/cfmt"
+)
 
 //Response :
 type Response struct {
@@ -35,6 +39,20 @@ type Candle struct {
 	StartTime  time.Time `json:"startTime"`
 	Volume     float32   `json:"volume"`
 	Resolution string
+	STrend     SuperTrend
+	SMA200     float32
+	ATR14      float32
+	ATR7       float32
+}
+
+//SuperTrend :
+type SuperTrend struct {
+	Color          cfmt.Color
+	Value          float32
+	BasicLowerBand float32
+	BasicUpperBand float32
+	FinalLowerBand float32
+	FinalUpperBand float32
 }
 
 //MarketData :

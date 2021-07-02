@@ -39,9 +39,8 @@ func New(marketList []string, s strategy, w account.Wallet, store store.HistoryS
 }
 
 //LaunchBacktest :
-func (s *StrategyRunner) LaunchBacktest() {
-
-	err := s.reader.Load()
+func (s *StrategyRunner) LaunchBacktest(term string) {
+	err := s.reader.Load(term)
 	if err != nil {
 		log.Fatalf("Error loading data, %v", err)
 	}
@@ -61,10 +60,8 @@ func (s *StrategyRunner) LaunchBacktest() {
 
 //Live :
 func (s *StrategyRunner) Live(market []string) {
-
 	second := time.Tick(time.Second)
 	newCandle := s.reader.GetNewCandleChannel()
-
 	go func() {
 		for candle := range newCandle {
 			cfmt.Printf(cfmt.Blue, "New candle!! high: %v low:%v", candle.High, candle.Low)
