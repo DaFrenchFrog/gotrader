@@ -39,7 +39,7 @@ func DrawChart(candles []model.Candle) {
 		dc.DrawCircle(float64(pos*SPACING), float64(math.Round(float64(c.SMA200-min)/height*H)), SPACING/2)
 		dc.Fill()
 		//DRAW SUPERTREND
-		dc.SetColor(color.Color)
+		// dc.SetColor(color.Color)
 		dc.DrawCircle(float64(pos*SPACING), float64(math.Round(float64(c.STrend.Value-min)/height*H)), SPACING/2)
 		dc.Fill()
 		if pos*SPACING > W {
