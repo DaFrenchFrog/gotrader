@@ -37,10 +37,6 @@ func (s *NormalStrategy) init() {
 
 func (s *NormalStrategy) apply(w *account.Wallet, candle model.Candle, market string) {
 	// showTicker(candle)
-	s.logged++
-	if s.logged < 1000 {
-		// logCandle(candle)
-	}
 
 	if candle.Open > candle.Close {
 		// cfmt.Println(cfmt.Red, "ATR14 : ", candle.ATR14)
