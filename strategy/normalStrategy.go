@@ -39,7 +39,7 @@ func (s *NormalStrategy) apply(w *account.Wallet, candle model.Candle, market st
 	// showTicker(candle)
 	s.logged++
 	if s.logged < 1000 {
-		logCandle(candle)
+		// logCandle(candle)
 	}
 
 	if candle.Open > candle.Close {

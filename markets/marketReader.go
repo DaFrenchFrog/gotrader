@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/elRomano/gotrader/store"
-
 	"github.com/elRomano/gotrader/ftx"
+	"github.com/elRomano/gotrader/gfx"
+	"github.com/elRomano/gotrader/store"
 
 	"github.com/elRomano/gotrader/cfmt"
 	"github.com/elRomano/gotrader/model"
@@ -49,6 +49,7 @@ func (m *MarketReader) Load(term string) error {
 		}
 		cfmt.Println(cfmt.Blue, "[3/3] Adding indicators...", cfmt.Neutral)
 		m.addIndicators(m.Data[mData.Name].History)
+		gfx.DrawChart(m.Data[mData.Name].History)
 		cfmt.Println(cfmt.Green, mData.Name, " loaded : ", cfmt.Neutral, len(m.Data[mData.Name].History), " entries from ", m.Data[mData.Name].History[0].StartTime.Format(model.DateLayoutLog))
 	}
 	return nil
