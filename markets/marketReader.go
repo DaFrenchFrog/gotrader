@@ -62,11 +62,7 @@ func (m *MarketReader) addIndicators(candles []model.Candle) {
 		candles[i].SMA200 = getSMA(200, candles, i)
 		candles[i].ATR14 = getATR(14, candles, i)
 		candles[i].ATR7 = getATR(7, candles, i)
-		candles[i].STrend = getSupertrend(2, candles, i)
-
-		if i < 10 {
-			cfmt.Println(cfmt.Yellow, "candles[", i, "].STrend ", candles[i].STrend.BasicLowerBand, "    ", candles[i].STrend.BasicUpperBand)
-		}
+		candles[i].STrend = getSupertrend(3, candles, i)
 	}
 }
 

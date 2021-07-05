@@ -1,8 +1,6 @@
 package markets
 
 import (
-	"fmt"
-
 	"github.com/elRomano/gotrader/cfmt"
 	"github.com/elRomano/gotrader/util"
 
@@ -40,10 +38,10 @@ func getSupertrend(multiplier int, c []model.Candle, n int) model.SuperTrend {
 	s.BasicLowerBand = (c[n].High+c[n].Low)/2 - float32(multiplier)*c[n].ATR7
 
 	if n < 200 {
-		s.FinalUpperBand = s.BasicUpperBand
-		s.FinalLowerBand = s.BasicLowerBand
+		s.FinalUpperBand = 0
+		s.FinalLowerBand = 0
 	} else {
-		fmt.Println(n, "basiclo= ", s.BasicLowerBand, " \tbasicup=", s.BasicUpperBand, " \tfinalLO-1=", c[n-1].STrend.FinalUpperBand, " \tfinalUP-1=", c[n-1].STrend.FinalUpperBand)
+		// fmt.Println(n, "basiclo= ", s.BasicLowerBand, " \tbasicup=", s.BasicUpperBand, " \tfinalLO-1=", c[n-1].STrend.FinalUpperBand, " \tfinalUP-1=", c[n-1].STrend.FinalUpperBand)
 		if s.BasicUpperBand < c[n-1].STrend.FinalUpperBand || c[n-1].Close > c[n-1].STrend.FinalUpperBand {
 			s.FinalUpperBand = s.BasicUpperBand
 		} else {
@@ -54,14 +52,22 @@ func getSupertrend(multiplier int, c []model.Candle, n int) model.SuperTrend {
 		} else {
 			s.FinalLowerBand = c[n-1].STrend.FinalLowerBand
 		}
-	}
-	if c[n].Close <= s.FinalUpperBand {
-		s.Value = s.FinalUpperBand
-		s.Color = cfmt.Red
-	} else {
-		s.Value = s.FinalLowerBand
-		s.Color = cfmt.Green
-	}
 
+		if c[n-1].STrend.Value == c[n-1].STrend.FinalUpperBand && c[n].Close <= s.FinalUpperBand {
+			s.Value = s.FinalUpperBand
+			s.Color = cfmt.Red
+		} else if c[n-1].STrend.Value == c[n-1].STrend.FinalUpperBand && c[n].Close >= s.FinalUpperBand {
+			s.Value = s.FinalLowerBand
+			s.Color = cfmt.Green
+		} else if c[n-1].STrend.Value == c[n-1].STrend.FinalLowerBand && c[n].Close >= s.FinalLowerBand {
+			s.Value = s.FinalLowerBand
+			s.Color = cfmt.Green
+		} else if c[n-1].STrend.Value == c[n-1].STrend.FinalLowerBand && c[n].Close <= s.FinalLowerBand {
+			s.Value = s.FinalUpperBand
+			s.Color = cfmt.Red
+		} else {
+			s.Value = 0
+		}
+	}
 	return s
 }
