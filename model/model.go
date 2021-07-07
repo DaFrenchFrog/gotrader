@@ -70,7 +70,7 @@ type MarketData struct {
 	PriceIncrement float32 `json:"priceIncrement"`
 	SizeIncrement  float32 `json:"sizeIncrement"`
 	Restricted     bool    `json:"restricted"`
-	History        []Candle
+	History        map[string][]Candle
 }
 
 // Layout format for date logging

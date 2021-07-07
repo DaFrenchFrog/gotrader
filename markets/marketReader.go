@@ -5,7 +5,6 @@ import (
 	"log"
 
 	"github.com/elRomano/gotrader/ftx"
-	"github.com/elRomano/gotrader/gfx"
 	"github.com/elRomano/gotrader/store"
 
 	"github.com/elRomano/gotrader/cfmt"
@@ -27,6 +26,8 @@ func NewReader(marketNames []string, store store.HistoryStore) MarketReader {
 	for _, m := range marketNames {
 		d[m] = &model.MarketData{}
 		d[m].Name = m
+		d[m].History = map[string][]model.Candle{}
+		d[m].History["1m"] = []model.Candle{}
 	}
 	return MarketReader{
 		Data:             d,
@@ -43,14 +44,14 @@ func (m *MarketReader) Load(term string) error {
 		m.loadMarketSummary(mData.Name)
 		cfmt.Print(cfmt.Blue, "[2/3] Loading history ")
 		if m.store.MarketExist(mData.Name) {
-			m.Data[mData.Name].History, _ = m.store.GetMarketHistory(mData.Name, term)
+			m.Data[mData.Name].History["1m"], _ = m.store.GetMarketHistory(mData.Name, term)
 		} else {
 			cfmt.Println(cfmt.Yellow, "Market ", mData.Name, " does not exist in database. Run -update to retrieve data.")
 		}
 		cfmt.Println(cfmt.Blue, "[3/3] Adding indicators...", cfmt.Neutral)
-		m.addIndicators(m.Data[mData.Name].History)
-		gfx.DrawChart(m.Data[mData.Name].History)
-		cfmt.Println(cfmt.Green, mData.Name, " loaded : ", cfmt.Neutral, len(m.Data[mData.Name].History), " entries from ", m.Data[mData.Name].History[0].StartTime.Format(model.DateLayoutLog))
+		m.addIndicators(m.Data[mData.Name].History["1m"])
+		// gfx.DrawChart(m.Data[mData.Name].History)
+		cfmt.Println(cfmt.Green, mData.Name, " loaded : ", cfmt.Neutral, len(m.Data[mData.Name].History), " entries from ", m.Data[mData.Name].History["1m"][0].StartTime.Format(model.DateLayoutLog))
 	}
 	return nil
 	// return m.GetMarketHistory()

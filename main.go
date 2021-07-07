@@ -10,7 +10,6 @@ import (
 	"github.com/boltdb/bolt"
 	"github.com/elRomano/gotrader/store/boltdb"
 
-	"github.com/elRomano/gotrader/account"
 	"github.com/elRomano/gotrader/cfmt"
 	"github.com/elRomano/gotrader/markets"
 	"github.com/elRomano/gotrader/model"
@@ -22,7 +21,8 @@ import (
 func main() {
 
 	cfmt.Println(cfmt.Cyan, "\nStarting program ||||||||||||||||||||||||||||||||||||||||||||||")
-	marketList := []string{"BTC/USDT" /*, "ETH/USDT", "DEFI-PERP" ,"SHIT-PERP", "ALT-PERP", "BULL/USDT", "BEAR/USDT", "ETHBULL/USDT", "ETHBEAR/USDT"*/}
+	marketList := []string{"BTC/USDT"}
+	// marketList := []string{"BTC/USDT", "ETH/USDT", "DEFI-PERP", "SHIT-PERP", "ALT-PERP", "BULL/USDT", "BEAR/USDT", "ETHBULL/USDT", "ETHBEAR/USDT"}
 	backtestCmd := flag.NewFlagSet("backtest", flag.ExitOnError)
 	backtestSpeedCmd := backtestCmd.String("term", "long", "'day', 'month','year','all'")
 	liveCmd := flag.NewFlagSet("live", flag.ExitOnError)
@@ -30,9 +30,6 @@ func main() {
 	if len(os.Args) < 2 {
 		log.Fatal(model.Color("red"), "Missing command: list, backtest, updatedb, showdb, or live", model.Color(""))
 	}
-
-	fakeWallet := account.New()
-	fakeWallet.RegisterMarkets(marketList, 1000)
 
 	db, err := bolt.Open("./gotrader.db", 0600, &bolt.Options{Timeout: 1 * time.Second})
 	if err != nil {
@@ -61,13 +58,14 @@ func main() {
 	case "backtest":
 		cfmt.Println(cfmt.Yellow, "Launching backtest on ", marketList, "...")
 		_ = backtestCmd.Parse(os.Args[2:])
-		runner := strategy.New(marketList, strategy.NewNormalStrategy(), fakeWallet, store)
+		// runner := strategy.New(marketList, strategy.NewNormalStrategy(), fakeWallet, store)
+		runner := strategy.New(marketList, store, 1000)
 		runner.LaunchBacktest(*backtestSpeedCmd)
 	case "live":
 		cfmt.Println(cfmt.Yellow, "Let's lose some money baby !")
 		_ = liveCmd.Parse(os.Args[2:])
-		runner := strategy.New(marketList, strategy.NewNormalStrategy(), fakeWallet, store)
-		runner.Live(marketList)
+		// runner := strategy.New(marketList, store)
+		// runner.Live(marketList)
 	default:
 		fmt.Println("command unknown")
 	}

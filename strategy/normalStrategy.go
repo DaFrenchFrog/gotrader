@@ -1,11 +1,6 @@
 package strategy
 
 import (
-	"math"
-	"strings"
-
-	"github.com/elRomano/gotrader/account"
-	"github.com/elRomano/gotrader/cfmt"
 	"github.com/elRomano/gotrader/model"
 )
 
@@ -16,6 +11,7 @@ type NormalStrategy struct {
 	WinLoseTrades   map[bool]int
 	position        Position
 	logged          int
+	Balance         float32
 }
 
 //NewNormalStrategy :
@@ -28,14 +24,15 @@ func NewNormalStrategy() *NormalStrategy {
 	}
 }
 
-func (s *NormalStrategy) init() {
+func (s *NormalStrategy) init(w float32) {
 	s.cumulativeGreen = 0
 	s.cumulativeRed = 0
 	s.WinLoseTrades = map[bool]int{}
 	s.position = Position{}
+	s.Balance = w
 }
 
-func (s *NormalStrategy) apply(w *account.Wallet, candle model.Candle, market string) {
+func (s *NormalStrategy) apply(candle model.Candle, market string) {
 	// showTicker(candle)
 
 	if candle.Open > candle.Close {
@@ -44,7 +41,7 @@ func (s *NormalStrategy) apply(w *account.Wallet, candle model.Candle, market st
 		s.cumulativeGreen = 0
 		if s.position != (Position{}) {
 			isWinning := false
-			w.Balance[market], isWinning = s.position.Close(candle.Close)
+			s.Balance, isWinning = s.position.Close(candle.Close, candle.StartTime)
 			s.WinLoseTrades[isWinning]++
 		}
 	} else {
@@ -52,8 +49,8 @@ func (s *NormalStrategy) apply(w *account.Wallet, candle model.Candle, market st
 		s.cumulativeGreen++
 		if s.cumulativeGreen >= 3 && s.position == (Position{}) {
 			// cfmt.Println(cfmt.Green, "BUY : ", v.Close)
-			s.position = NewPosition("long", candle.Close, (w.Balance[market]*.1)/candle.Close)
-			w.Balance[market] = 0
+			s.position = NewPosition("long", candle.Close, (s.Balance*.1)/candle.Close, candle.StartTime)
+			s.Balance = 0
 		}
 	}
 }
@@ -69,36 +66,3 @@ func (s *NormalStrategy) LosingTrades() int {
 }
 
 //logCandle
-func logCandle(c model.Candle) {
-	if c.Open > c.Close {
-		cfmt.Print(cfmt.Red, c.StartTime.Format(model.DateLayoutLog))
-	} else {
-		cfmt.Print(cfmt.Green, c.StartTime.Format(model.DateLayoutLog))
-	}
-	cfmt.Println(cfmt.Neutral, " O=", c.Open, " H=", c.High, " L=", c.Low, " C=", c.Close, " VOL=", c.Volume, " \t ATR7=", c.ATR7, " SMA200=", c.SMA200, "\t ST : bLO=", c.STrend.BasicLowerBand, " bUP=", c.STrend.BasicUpperBand, " V=", c.STrend.Color, c.STrend.Value, "$")
-}
-
-//showCandle
-func showCandle(candle model.Candle) {
-	drawingLength := float32(10)
-	var thinLowRatio float64
-	var thickRatio float64
-	var thinHighRatio float64
-	var drawing string
-	amplitude := candle.High - candle.Low
-	drawing = ""
-
-	if candle.Open < candle.Close {
-		//GREEN
-		thinLowRatio = math.Round(float64((candle.Open - candle.Low) / amplitude * drawingLength))
-		thickRatio = math.Round(float64((candle.Close - candle.Open) / amplitude * drawingLength))
-		thinHighRatio = math.Round(float64((candle.High - candle.Close) / amplitude * drawingLength))
-		// cfmt.Println(cfmt.Red, thinLowRatio, " + ", thickRatio, " + ", thinHighRatio, " = ", thinLowRatio+thickRatio+thinHighRatio)
-	}
-	drawing += "["
-	drawing += strings.Repeat("-", int(thinLowRatio))
-	drawing += strings.Repeat("=", int(thickRatio))
-	drawing += strings.Repeat("-", int(thinHighRatio))
-	drawing += "]"
-	cfmt.Println(cfmt.Green, (candle.Open - candle.Low), "/", amplitude, "*", drawingLength, " = \t", thinLowRatio, "\t", thinHighRatio, "\t", thickRatio, "\t", drawing)
-}
