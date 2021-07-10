@@ -26,13 +26,9 @@ func NewReader(marketNames []string, store store.HistoryStore) MarketReader {
 	for _, m := range marketNames {
 		d[m] = &model.MarketData{}
 		d[m].Name = m
-		d[m].History := make(map[string][]model.Candle, 3)
-		fmt.Print(f)
-		//candles sur 1 mn
+		d[m].History = make(map[string][]model.Candle)
 		d[m].History["1m"] = []model.Candle{}
-		//candles sur 1 h calculées à partir du 1 mn
 		d[m].History["1h"] = []model.Candle{}
-		//candles sur 1 journée calculée à partir du 1h
 		d[m].History["1d"] = []model.Candle{}
 	}
 	return MarketReader{
